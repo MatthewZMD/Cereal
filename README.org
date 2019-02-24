@@ -1,0 +1,6 @@
+#+TITLE: M-Kilo
+This is a personal text editor highly inspired from [[https://viewsourcecode.org/snaptoken/kilo/index.html][Kilo]].
+* Windows version of some libraries used in M-Kilo.
+  - [[https://stackoverflow.com/questions/341817/is-there-a-replacement-for-unistd-h-for-windows-visual-c][unistd]]
+  - [[https://www.codeproject.com/Articles/157001/Full-getopt-Port-for-Unicode-and-Multibyte-Microso][getopt]]
+  - [[https://github.com/ChristianVisintin/termiWin][termiWin]] a termios port for Windows
