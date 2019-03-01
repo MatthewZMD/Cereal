@@ -1,5 +1,5 @@
-mkilo.exe: mkilo.c termiWin.c getopt.c
-	gcc -o mkilo.exe mkilo.c termiWin.c getopt.c
+mkilo.exe: mkilo.c
+	gcc mkilo.c -o mkilo
 
 # target: dependencies
-# 	action
+#	action
