@@ -1,7 +1,9 @@
 #+TITLE: M-Kilo
 This is a text editor based on [[https://github.com/antirez/kilo][Kilo]].
 * Why Writing a Text Editor?
-  February 2019, I was introduced into EMACS, a 40+ year-old text editor that is still alive today. EMACS is something I never experience before, I began to play around with the configurations and eventually created my [[https://github.com/MatthewZMD/.emacs.d][own setup]]. I am thrilled by the capabilities of EMACS, or text editor in general. I began to think about creating a text editor myself and encountered [[https://viewsourcecode.org/snaptoken/kilo/index.html][Kilo]]. However, how useless and waste of time is writing an editor in 2019? There are many more cool and complex projects I can do. I think that writing a tool as fundamental as a text editor is not only very fun and refreshing, it is also a source of inspiration, something I believe is useful in long-term..
+  February 2019, I was introduced into EMACS, a 40+ year-old text editor that is still alive today. EMACS is something I never experience before, I began to play around with the configurations and eventually created my [[https://github.com/MatthewZMD/.emacs.d][own setup]]. I am thrilled by the capabilities of EMACS, or text editor in general. I began to think about creating a text editor myself and encountered [[https://viewsourcecode.org/snaptoken/kilo/index.html][Kilo]]. However, how useless and waste of time is writing an editor in 2019? There are many more cool and complex projects I can do. I think that writing a tool as fundamental as a text editor is not only very fun and refreshing, it is also a source of inspiration, something I believe is useful in long-term.
+* What does M stands for in M-Kilo
+  A lot of possible meanings, such as Matthew's Kilo, Modified Kilo, More than Kilo.
 * Windows version of some libraries used in M-Kilo.
   - [[https://stackoverflow.com/questions/341817/is-there-a-replacement-for-unistd-h-for-windows-visual-c][unistd]]
   - [[https://www.codeproject.com/Articles/157001/Full-getopt-Port-for-Unicode-and-Multibyte-Microso][getopt]]

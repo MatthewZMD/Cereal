@@ -1,2 +1,5 @@
-kilo: kilo.c
-	$(CC) kilo.c -o kilo -Wall -Wextra -pedantic -std=c99
+mkilo.exe: mkilo.c termiWin.c getopt.c
+	gcc -o mkilo.exe mkilo.c termiWin.c getopt.c
+
+# target: dependencies
+# 	action
