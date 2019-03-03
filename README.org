@@ -1,8 +1,6 @@
 #+TITLE: M-Kilo
 This is a text editor based on [[https://github.com/antirez/kilo][Kilo]].
 * Why Writing a Text Editor?
-  February 2019, I was introduced into EMACS, a 40+ year-old text editor that is still alive and the community is very active. EMACS is something I never experience before, I began to play around with the configurations and eventually created my [[https://github.com/MatthewZMD/.emacs.d][own setup]]. I am thrilled by the capabilities of EMACS, or text editors in general. I began to think about creating a text editor myself and encountered Kilo. However, how useless and waste of time is writing an editor in 2019? There are many more cool and complex projects I can do. Right?
-
-  Well, I think writing a tool as fundamental as a text editor is not only fun and refreshing, it is also a source of inspiration, something I believe will be very useful in long-term.
+  February 2019, I was introduced into EMACS, a 40+ year-old text editor that is still alive and the community is very active. EMACS is something I never experience before, I began to play around with the configurations and eventually created my [[https://github.com/MatthewZMD/.emacs.d][own setup]]. I am thrilled by the capabilities of EMACS, or text editors in general. I began to think about creating a text editor myself and encountered Kilo. However, how useless and waste of time is writing an editor in 2019? There are many more cool and complex projects I can do. Right? Nope, I think writing a tool as fundamental as a text editor is not only fun and refreshing, it is also a source of inspiration, something I believe will be very useful in long-term.
 * What does M stands for in M-Kilo
   A lot of possible meanings, such as Matthew's Kilo, Modified Kilo, More than Kilo.
