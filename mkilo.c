@@ -19,12 +19,14 @@
 #define MKILO_VERSION "0.0.1"
 #define KILO_TAB_STOP 8
 
+// CTRL key strips bits 5 and 6 from the key pressed in combination with CTRL.
+// This behavier is reproduced using Bitmasking with 0x1f, that is 00011111.
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 enum editorKey {
   ARROW_UP = 1000,
-  ARROW_LEFT,
   ARROW_DOWN,
+  ARROW_LEFT,
   ARROW_RIGHT,
   HOME_KEY,
   END_KEY,
@@ -120,6 +122,8 @@ int editorReadKey(){
     }
   }
 
+  // \x1b is <esc>, or 27 in terminal. <esc>[ following specific commands forms the VT100 escape sequence.
+  // It instructs the terminal to do various text formatting tasks.
   if(c == '\x1b'){
     char seq[3];
 
@@ -383,9 +387,7 @@ void editorDrawRows(struct abuf *ab){
 
     // clear 1 line at a time
     abAppend(ab, "\x1b[K", 3);
-    if(y < E.screenrows -1){
-      abAppend(ab, "\r\n", 2);
-    }
+    abAppend(ab, "\r\n", 2);
   }
 }
 
@@ -463,6 +465,28 @@ void editorMoveCursor(int key){
 void editorProcessKeypress(){
   int c = editorReadKey();
 
+  // Use EMACS bindings
+  switch(c){
+  case CTRL_KEY('a'):
+    c = HOME_KEY;
+    break;
+  case CTRL_KEY('e'):
+    c = END_KEY;
+    break;
+  case CTRL_KEY('p'):
+    c = ARROW_UP;
+    break;
+  case CTRL_KEY('n'):
+    c = ARROW_DOWN;
+    break;
+  case CTRL_KEY('f'):
+    c = ARROW_RIGHT;
+    break;
+  case CTRL_KEY('b'):
+    c = ARROW_LEFT;
+    break;
+  }
+
   switch(c){
   case CTRL_KEY('q'):
     // clear screen on exit
@@ -476,7 +500,9 @@ void editorProcessKeypress(){
     E.cx = 0;
     break;
   case END_KEY:
-    E.cx = E.screencols - 1;
+    if (E.cy < E.numrows){
+      E.cx = E.row[E.cy].size;
+    }
     break;
 
   case PAGE_UP:
@@ -496,12 +522,14 @@ void editorProcessKeypress(){
       }
     }
     break;
+
   case ARROW_UP:
   case ARROW_DOWN:
   case ARROW_LEFT:
   case ARROW_RIGHT:
     editorMoveCursor(c);
     break;
+
   }
 }
 
@@ -520,6 +548,7 @@ void initEditor(){
   if(getWindowSize(&E.screenrows, &E.screencols) == -1){
     die("getwindowsize");
   }
+  E.screenrows -= 1;
 }
 
 int main(int argc, char *argv[]) {
