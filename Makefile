@@ -1,5 +1,5 @@
-mkilo.exe: mkilo.c
-	gcc mkilo.c -o mkilo
+Cereal.exe: Cereal.c
+	gcc Cereal.c -o Cereal
 
 # target: dependencies
 #	action

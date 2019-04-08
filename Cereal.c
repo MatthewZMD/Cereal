@@ -16,8 +16,8 @@
 
 /*** defines ***/
 
-#define MKILO_VERSION "0.0.1"
-#define KILO_TAB_STOP 8
+#define CEREAL_VERSION "0.0.1"
+#define CEREAL_TAB_STOP 8
 
 // CTRL key strips bits 5 and 6 from the key pressed in combination with CTRL.
 // This behavier is reproduced using Bitmasking with 0x1f, that is 00011111.
@@ -224,7 +224,7 @@ int editorRowCxToRx(erow *row, int cx){
   int j;
   for (j = 0; j < cx; ++j){
     if(row -> chars[j] == '\t'){
-      rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
+      rx += (CEREAL_TAB_STOP - 1) - (rx % CEREAL_TAB_STOP);
     }
     ++rx;
   }
@@ -240,13 +240,13 @@ void editorUpdateRow(erow *row){
     }
   }
   free(row->render);
-  row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) +1);
+  row->render = malloc(row->size + tabs*(CEREAL_TAB_STOP - 1) +1);
 
   int idx = 0;
   for(j = 0; j < row->size; ++j){
     if(row->chars[j] == '\t'){
       row->render[idx++] = ' ';
-      while(idx % KILO_TAB_STOP != 0){
+      while(idx % CEREAL_TAB_STOP != 0){
         row->render[idx++] = ' ';
       }
     } else {
@@ -354,7 +354,7 @@ void editorDrawRows(struct abuf *ab){
     if(filerow >= E.numrows){
       if(E.numrows == 0 && y == E.screenrows / 3){
         char welcome[80];
-        int welcomelen = snprintf(welcome, sizeof(welcome), "Welcome to M-Kilo v%s", MKILO_VERSION);
+        int welcomelen = snprintf(welcome, sizeof(welcome), "Welcome to Cereal v%s", CEREAL_VERSION);
         if(welcomelen > E.screencols){
           welcomelen = E.screencols;
         }
@@ -391,6 +391,17 @@ void editorDrawRows(struct abuf *ab){
   }
 }
 
+void editorDrawStatusBar(struct abuf *ab){
+  // <esc>[7m switches to inverted colors
+  abAppend(ab, "\x1b[7m", 4);
+  int len = 0;
+  while(len < E.screencols){
+    abAppend(ab, " ", 1);
+    ++len;
+  }
+  abAppend(ab, "\x1b[m", 3); // switches back
+}
+
 void editorRefreshScreen(){
   editorScroll();
 
@@ -404,6 +415,7 @@ void editorRefreshScreen(){
   abAppend(&ab, "\x1b[H", 3);
 
   editorDrawRows(&ab);
+  editorDrawStatusBar(&ab);
 
   // print moving cursor
   char buf[32];
