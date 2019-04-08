@@ -63,7 +63,6 @@ void die(const char *s){
   write(STDOUT_FILENO, "\x1b[2J", 4);
   write(STDOUT_FILENO, "\x1b[H", 3);
 
-
   perror(s);
   exit(1);
 }
@@ -239,7 +238,6 @@ void editorUpdateRow(erow *row){
   free(row->render);
   row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) +1);
 
-
   int idx = 0;
   for(j = 0; j < row->size; ++j){
     if(row->chars[j] == '\t'){
@@ -324,7 +322,8 @@ void abFree(struct abuf *ab){
 /*** output ***/
 
 void editorScroll(){
-  E.rx = 0;
+  E.rx = E.cx;
+
   if(E.cy < E.numrows){
     E.rx = editorRowCxToRx(&E.row[E.cy], E.cx);
   }
@@ -483,6 +482,14 @@ void editorProcessKeypress(){
   case PAGE_UP:
   case PAGE_DOWN:
     {
+      if (c == PAGE_UP) {
+        E.cy = E.rowoff;
+      }else if (c == PAGE_DOWN){
+        E.cy = E.rowoff + E.screenrows - 1;
+        if (E.cy > E.numrows){
+          E.cy = E.numrows;
+        }
+      }
       int times = E.screenrows;
       while (times--){
         editorMoveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
