@@ -6,8 +6,8 @@
 
 #include <ctype.h>
 #include <errno.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -229,8 +229,6 @@ int getWindowSize(int *rows, int *cols) {
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
         if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) {
             return -1;
-        } else {
-            editorReadKey();
         }
         return getCursorPosition(rows, cols);
     } else {
@@ -273,7 +271,7 @@ void editorUpdateRow(erow *row) {
                 row->render[idx++] = ' ';
             }
         } else {
-            row->render[++idx] = row->chars[j];
+            row->render[idx++] = row->chars[j];
         }
     }
     row->render[idx] = '\0';
@@ -296,8 +294,8 @@ void editorAppendRow(char *s, size_t len) {
     ++E.numrows;
 }
 
-void editorRowInsertChar(erow *row, int at, int c){
-    if (at < 0 || at > row->size){
+void editorRowInsertChar(erow *row, int at, int c) {
+    if (at < 0 || at > row->size) {
         at = row->size;
     }
     row->chars = realloc(row->chars, row->size + 2);
@@ -309,8 +307,8 @@ void editorRowInsertChar(erow *row, int at, int c){
 
 /*** editor operations ***/
 
-void editorInsertChar(int c){
-    if(E.cy == E.numrows){
+void editorInsertChar(int c) {
+    if (E.cy == E.numrows) {
         editorAppendRow("", 0);
     }
     editorRowInsertChar(&E.row[E.cy], E.cx, c);
@@ -318,6 +316,26 @@ void editorInsertChar(int c){
 }
 
 /*** file i/o ***/
+
+char *editorRowsToString(int *buflen) {
+    int totlen = 0;
+    int j;
+    for (j = 0; j < E.numrows; ++j) {
+        totlen += E.row[j].size + 1;
+    }
+    *buflen = totlen;
+
+    char *buf = malloc(totlen);
+    char *p = buf;
+    for (j = 0; j < E.numrows; ++j) {
+        memcpy(p, E.row[j].chars, E.row[j].size);
+        p += E.row[j].size;
+        *p = '\n';
+        ++p;
+    }
+
+    return buf;
+}
 
 void editorOpen(char *filename) {
     free(E.filename);
@@ -331,9 +349,8 @@ void editorOpen(char *filename) {
     size_t linecap = 0;
     ssize_t linelen = getline(&line, &linecap, fp);
     while ((linelen = getline(&line, &linecap, fp)) != -1) {
-        /* TODO: Display error */
-        while (linelen > 0 && (line[linelen - 1] == '\n' ||
-                               line[linelen - 1] == '\r')) {
+        while (linelen > 0 &&
+               (line[linelen - 1] == '\n' || line[linelen - 1] == '\r')) {
             --linelen;
         }
         editorAppendRow(line, linelen);
@@ -376,7 +393,6 @@ void editorScroll() {
     if (E.cy < E.numrows) {
         E.rx = editorRowCxToRx(&E.row[E.cy], E.cx);
     }
-
     if (E.cy < E.rowoff) {
         E.rowoff = E.cy;
     }
@@ -399,7 +415,8 @@ void editorDrawRows(struct abuf *ab) {
         if (filerow >= E.numrows) {
             if (E.numrows == 0 && y == E.screenrows / 3) {
                 char welcome[80];
-                int welcomelen = snprintf(welcome, sizeof(welcome), "Welcome to Cereal v%s", CEREAL_VERSION);
+                int welcomelen = snprintf(welcome, sizeof(welcome),
+                                          "Welcome to Cereal v%s", CEREAL_VERSION);
                 if (welcomelen > E.screencols) {
                     welcomelen = E.screencols;
                 }
@@ -442,16 +459,17 @@ void editorDrawStatusBar(struct abuf *ab) {
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s",
                        E.filename ? E.filename : "[No Name]");
-    int rlen = snprintf(rstatus, sizeof(rstatus), "line %d of %d", E.cy + 1, E.numrows);
-    if (len > E.screencols){
+    int rlen =
+        snprintf(rstatus, sizeof(rstatus), "line %d of %d", E.cy + 1, E.numrows);
+    if (len > E.screencols) {
         len = E.screencols;
     }
     abAppend(ab, status, len);
     while (len < E.screencols) {
-        if(E.screencols - len == rlen){
+        if (E.screencols - len == rlen) {
             abAppend(ab, rstatus, rlen);
             break;
-        }else{
+        } else {
             abAppend(ab, " ", 1);
             ++len;
         }
@@ -460,13 +478,13 @@ void editorDrawStatusBar(struct abuf *ab) {
     abAppend(ab, "\r\n", 2);
 }
 
-void editorDrawMessageBar(struct abuf *ab){
+void editorDrawMessageBar(struct abuf *ab) {
     abAppend(ab, "\x1b[k", 3);
     int msglen = strlen(E.statusmsg);
-    if(msglen > E.screencols){
+    if (msglen > E.screencols) {
         msglen = E.screencols;
     }
-    if(msglen && time(NULL) - E.statusmsg_time < 5){
+    if (msglen && time(NULL) - E.statusmsg_time < 5) {
         abAppend(ab, E.statusmsg, msglen);
     }
 }
@@ -499,7 +517,7 @@ void editorRefreshScreen() {
     abFree(&ab);
 }
 
-void editorSetStatusMessage(const char *fmt, ...){
+void editorSetStatusMessage(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
@@ -558,7 +576,6 @@ void editorProcessKeypress() {
 
     // Use EMACS bindings
     switch (c) {
-
     case '\r':
         /* TODO */
         break;
@@ -580,6 +597,9 @@ void editorProcessKeypress() {
         break;
     case CTRL_KEY('b'):
         c = ARROW_LEFT;
+        break;
+    case CTRL_KEY('v'):
+        c = PAGE_DOWN;
         break;
     }
 
@@ -630,7 +650,7 @@ void editorProcessKeypress() {
         editorMoveCursor(c);
         break;
 
-    // ignore C-l and ESC
+        // ignore C-l and ESC
     case CTRL('l'):
     case '\x1b':
         break;
@@ -638,7 +658,6 @@ void editorProcessKeypress() {
     default:
         editorInsertChar(c);
         break;
-
     }
 }
 
