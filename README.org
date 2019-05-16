@@ -2,3 +2,5 @@
 Cereal is a simple terminal-based text editor that is originally an implementation of [[https://github.com/antirez/kilo][Kilo]], with some additional features.
 * Why Writing a Text Editor?
   February 2019, I was introduced into EMACS, a 40+ year-old text editor that is still as alive as ever. I played around with the configurations and eventually created my own - [[https://github.com/MatthewZMD/.emacs.d][M-EMACS]]. I began to think about writing a text editor myself. I believe creating a tool as fundamental as a text editor from scratch is not only interesting, it's also a refreshing source of inspiration and a precious experience.
+* Ideas
+** TODO Implement Language Server Protocol
