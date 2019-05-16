@@ -201,7 +201,7 @@ int getCursorPosition(int *rows, int *cols) {
     char buf[32];
     unsigned int i = 0;
 
-    if (write(STDOUT_FILENO, "\1xb[6n", 4) != 4) {
+    if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4) {
         return -1;
     }
 
@@ -352,7 +352,7 @@ void editorOpen(char *filename) {
     }
     char *line = NULL;
     size_t linecap = 0;
-    ssize_t linelen = getline(&line, &linecap, fp);
+    ssize_t linelen;
     while ((linelen = getline(&line, &linecap, fp)) != -1) {
         while (linelen > 0 &&
                (line[linelen - 1] == '\n' || line[linelen - 1] == '\r')) {
@@ -419,7 +419,7 @@ void abFree(struct abuf *ab) { free(ab->b); }
 /*** output ***/
 
 void editorScroll() {
-    E.rx = E.cx;
+    E.rx = 0;
 
     if (E.cy < E.numrows) {
         E.rx = editorRowCxToRx(&E.row[E.cy], E.cx);
@@ -510,7 +510,7 @@ void editorDrawStatusBar(struct abuf *ab) {
 }
 
 void editorDrawMessageBar(struct abuf *ab) {
-    abAppend(ab, "\x1b[k", 3);
+    abAppend(ab, "\x1b[K", 3);
     int msglen = strlen(E.statusmsg);
     if (msglen > E.screencols) {
         msglen = E.screencols;
