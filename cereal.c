@@ -15,6 +15,7 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 /*** defines ***/
 
@@ -63,6 +64,10 @@ struct editorConfig {
 };
 
 struct editorConfig E;
+
+/*** prototypes ***/
+
+void editorSetStatusMessage(const char *fmt, ...);
 
 /*** terminal ***/
 
@@ -359,6 +364,32 @@ void editorOpen(char *filename) {
     fclose(fp);
 }
 
+void editorSave() {
+    // new file
+    if(E.filename == NULL) return;
+
+    int len;
+    char *buf = editorRowsToString(&len);
+    // create a new file if it doesn't already exist (O_CREAT),
+    //  then open it for reading and writing (O_RDWR)
+    // 0644 is the standard permission for text files needed due to O_CREAT flag
+    int fd = open(E.filename, O_RDWR | O_CREAT, 0644);
+    if(fd != -1){
+        if(ftruncate(fd, len) != -1){ // sets the file size to len
+            if (write(fd, buf, len) == len) {
+                close(fd);
+                free(buf);
+                editorSetStatusMessage("%d bytes written to disk", len);
+                return;
+            }
+        }
+        close(fd);
+    }
+    free(buf);
+    editorSetStatusMessage("Can't save! I/O error: %s", strerror(errno));
+}
+
+
 /*** append buffer ***/
 
 struct abuf {
@@ -612,6 +643,11 @@ void editorProcessKeypress() {
         exit(0);
         break;
 
+    case CTRL_KEY('s'):
+        editorSave();
+        break;
+
+
     case HOME_KEY:
         E.cx = 0;
         break;
@@ -622,7 +658,7 @@ void editorProcessKeypress() {
         break;
 
     case BACKSPACE:
-    case CTRL('h'):
+    case CTRL_KEY('h'):
     case DEL_KEY:
         /* TODO */
         break;
@@ -650,8 +686,8 @@ void editorProcessKeypress() {
         editorMoveCursor(c);
         break;
 
-        // ignore C-l and ESC
-    case CTRL('l'):
+        // ignore C-l and ECTRLSC
+    case CTRL_KEY('l'):
     case '\x1b':
         break;
 
@@ -688,7 +724,7 @@ int main(int argc, char *argv[]) {
         editorOpen(argv[1]);
     }
 
-    editorSetStatusMessage("HELP: Quit with C-q");
+    editorSetStatusMessage("HELP: Save with C-s | Quit with C-q");
 
     while (1) {
         editorRefreshScreen();
