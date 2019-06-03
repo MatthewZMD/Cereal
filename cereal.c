@@ -27,6 +27,8 @@
 // This behavier is reproduced using Bitmasking with 0x1f, that is 00011111.
 #define CTRL_KEY(k) ((k)&0x1f)
 
+#define HL_HIGHLIGHT_NUMBER (1<<0)
+
 enum editorKey {
     BACKSPACE = 127,
     ARROW_UP = 1000,
@@ -56,6 +58,12 @@ typedef struct erow {
     unsigned char *hl;
 } erow;
 
+struct editorSyntax {
+    char *filetype;
+    char **filematch;
+    int flags;
+};
+
 struct editorConfig {
     int cx, cy;
     int rx;
@@ -69,10 +77,25 @@ struct editorConfig {
     char *filename;
     char statusmsg[80];
     time_t statusmsg_time;
+    struct editorSyntax *syntax;
     struct termios orig_termios;
 };
 
 struct editorConfig E;
+
+/*** filetypes ***/
+
+char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
+
+struct editorSyntax HLDB[] = {
+    {
+        "c",
+        C_HL_extensions,
+        HL_HIGHLIGHT_NUMBER
+    },
+};
+
+#define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
 
 /*** prototypes ***/
 
@@ -264,6 +287,8 @@ void editorUpdateSyntax (erow *row) {
     row->hl = realloc(row->hl, row->rsize);
     memset(row->hl, HL_NORMAL, row->rsize);
 
+    if (E.syntax == NULL) return;
+
     int prev_sep = 1;
 
     int i = 0;
@@ -271,12 +296,14 @@ void editorUpdateSyntax (erow *row) {
         char c = row->render[i];
         unsigned char prev_hl = (i > 0) ? row->hl[i - 1] : HL_NORMAL;
 
-        if ((isdigit(c) && (prev_sep || prev_hl == HL_NUMBER)) ||
-            (c == '.' && prev_hl == HL_NUMBER)){
-            row->hl[i] = HL_NUMBER;
-            ++i;
-            prev_sep = 0;
-            continue;
+        if(E.syntax->flags & HL_HIGHLIGHT_NUMBER) {
+            if ((isdigit(c) && (prev_sep || prev_hl == HL_NUMBER)) ||
+                (c == '.' && prev_hl == HL_NUMBER)) {
+                row->hl[i] = HL_NUMBER;
+                ++i;
+                prev_sep = 0;
+                continue;
+            }
         }
 
         prev_sep = is_separator(c);
@@ -291,6 +318,10 @@ int editorSyntaxToColor (int hl) {
     case HL_MATCH: return 34;
     default: return 37;
     }
+}
+
+void editorSelectSyntaxHighlight() {
+
 }
 
 /*** row operations ***/
@@ -729,8 +760,8 @@ void editorDrawStatusBar(struct abuf *ab) {
     int len = snprintf(status, sizeof(status), "%.20s %s",
                        E.filename ? E.filename : "[No Name]",
                        E.dirty ? "(modified)" : "");
-    int rlen =
-        snprintf(rstatus, sizeof(rstatus), "line %d of %d", E.cy + 1, E.numrows);
+    int rlen = snprintf(rstatus, sizeof(rstatus), "%s | line %d of %d",
+                        E.syntax ? E.syntax->filetype : "no ft", E.cy + 1, E.numrows);
     if (len > E.screencols) {
         len = E.screencols;
     }
@@ -1020,6 +1051,7 @@ void initEditor() {
     E.filename = NULL;
     E.statusmsg[0] = '\0';
     E.statusmsg_time = 0;
+    E.syntax = NULL;
 
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) {
         die("getwindowsize");
